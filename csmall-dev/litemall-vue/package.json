@@ -1,0 +1,109 @@
+{
+  "name": "csmall.mall",
+  "version": "1.0.4",
+  "description": "litemall-vue basing on vant--mobile-mall 0.1.0",
+  "author": "litemall <linlinjava@163.com>",
+  "license": "MIT",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "serve": "vue-cli-service serve",
+    "build": "vue-cli-service build  --mode production",
+    "build:dep": "vue-cli-service build --mode deployment",
+    "build:prod": "vue-cli-service build --mode production",
+    "android:dev": "vue-cli-service build --mode development",
+    "ios:dev": "vue-cli-service build  --mode development",
+    "android:prod": "vue-cli-service build  --mode production && node android.pack.js",
+    "ios:prod": "vue-cli-service build  --mode production && cordova build ios",
+    "android:dep": "vue-cli-service build --mode deployment && node android.pack.js",
+    "ios:dep": "vue-cli-service build --mode deployment && cordova build ios",
+    "lint": "vue-cli-service lint"
+  },
+  "dependencies": {
+    "@chenfengyuan/vue-countdown": "^1.1.5",
+    "axios": ">=0.18.1",
+    "cordova-plugin-appavailability": "0.4.2",
+    "dayjs": "^1.7.7",
+    "html2canvas": "^1.0.0-rc.7",
+    "js-cookie": "2.2.0",
+    "js-md5": "^0.7.3",
+    "lib-flexible": "^0.3.2",
+    "lodash": "^4.17.19",
+    "lrz": "^4.9.40",
+    "qrcodejs2": "0.0.2",
+    "vant": "^2.10.6",
+    "vconsole": "^3.3.4",
+    "vue": "^2.6.12",
+    "vue-router": "^3.1.0",
+    "vuelidate": "^0.7.4",
+    "vuex": "^3.4.0"
+  },
+  "devDependencies": {
+    "@osvlabs/cordova-plugin-decode-qr-image": "0.0.4",
+    "@vue/cli-plugin-babel": "^3.0.5",
+    "@vue/cli-plugin-eslint": "^3.0.5",
+    "@vue/cli-service": "^3.0.5",
+    "@vue/eslint-config-prettier": "^3.0.5",
+    "babel-plugin-import": "^1.9.1",
+    "babel-plugin-lodash": "^3.3.4",
+    "cordova-android": "^9.0.0",
+    "cordova-ios": "^6.1.1",
+    "cordova-plugin-add-swift-support": "^2.0.2",
+    "cordova-plugin-alipay-v2": "https://gitee.com/ruibty/cordova-plugin-alipay-v2.git",
+    "cordova-plugin-android-permissions": "^1.1.0",
+    "cordova-plugin-apkupdater": "^1.2.3",
+    "cordova-plugin-app-version": "^0.1.9",
+    "cordova-plugin-camera": "^5.0.1",
+    "cordova-plugin-device": "^2.0.3",
+    "cordova-plugin-inappbrowser": "^4.0.0",
+    "cordova-plugin-qrscanner-plus": "^3.1.0",
+    "cordova-plugin-wechat": "^3.0.0",
+    "cordova-plugin-whitelist": "^1.3.4",
+    "cordova-save-image-gallery": "0.0.26",
+    "eeschiavo-cordova-plugin-clipboard": "^1.0.2",
+    "node-sass": "^4.14.1",
+    "postcss-pxtorem": "^5.1.1",
+    "sass-loader": "^7.1.0",
+    "video.js": "^7.10.2",
+    "vue-template-compiler": "^2.6.12"
+  },
+  "browserslist": [
+    "defaults",
+    "not ie < 11",
+    "last 2 versions",
+    "> 1%",
+    "iOS 7"
+  ],
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-app-version": {},
+      "eeschiavo-cordova-plugin-clipboard": {},
+      "cordova-plugin-android-permissions": {},
+      "cordova-save-image-gallery": {},
+      "cordova-plugin-inappbrowser": {},
+      "cordova-plugin-alipay-v2": {
+        "APP_ID": "2021002101697013"
+      },
+      "cordova-plugin-qrscanner-plus": {},
+      "cordova-plugin-DecodeQRImage": {},
+      "cordova-plugin-camera": {
+        "ANDROID_SUPPORT_V4_VERSION": "27.+"
+      },
+      "cordova-plugin-apkupdater": {
+        "ANDROID_SUPPORT_V4_VERSION": "27.+"
+      },
+      "cordova-plugin-appavailability": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-wechat": {
+        "WECHATAPPID": "wxc4edcab0421fa1d6",
+        "UNIVERSALLINK": "https://share.pgwlxx.com/"
+      }
+    },
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  }
+}

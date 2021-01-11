@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<title>注册</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.10/lib/index.css" />
+		<link rel="icon" href="./sources/favicon.ico" type="image/x-icon" />
+		<link href="./sources/index.css" rel="stylesheet" />
+	</head>
+	<body>
+		<div id="app">
+			<van-nav-bar class="header" title="注册" :border="false"></van-nav-bar>
+			<img src="sources/bg.png" class="top_img" >
+			<div class="content">
+				<van-cell-group :border="false" class="content_box">
+					<van-field class="content_field" type="tel" size="large" v-model="phone" placeholder="请输入手机号码">
+						<template #left-icon>
+							<van-icon :name="accountIcon" size="20"></van-icon>
+						</template>
+					</van-field>
+					<van-field class="content_field" type="digit" size="large" v-model="code" placeholder="请输入验证码">
+						<template #left-icon>
+							<van-icon :name="codeIcon" size="20"></van-icon>
+						</template>
+						<template #button>
+							<van-button class="content_button" plain :color="counting ? '#999':'#f60'" size="small" type="primary" :disabled="counting" @click="getCkCode">
+								<span v-if="counting">{{count}}秒</span>
+								<span v-else>获取验证码</span>
+							</van-button>
+						</template>
+					</van-field>
+					<van-field class="content_field" :type="typeName" size="large" v-model="pass" placeholder="请设置您的登陆密码">
+						<template #left-icon>
+							<van-icon :name="pwdIcon" size="20"></van-icon>
+						</template>
+						<template #right-icon>
+							<van-icon :name="iconName" class="content_icon" @click="statusClick" />
+						</template>
+					</van-field>
+					<van-field class="content_field" :type="typeName" size="large" v-model="conPass" placeholder="请确认您的登陆密码">
+						<template #left-icon>
+							<van-icon :name="pwdIcon" size="20"></van-icon>
+						</template>
+						<template #right-icon>
+							<van-icon :name="iconName" class="content_icon" @click="statusClick" />
+						</template>
+					</van-field>
+				</van-cell-group>
+				<div class="content_bt">
+					<van-button :loading="isLogining" loading-text="提交中..." class="bt_btn content_bt_top" type="primary" color="#F60" block @click="confirmClick">注册</van-button>
+					<van-button class="bt_btn content_bt_bottom" type="primary" color="#ff9e3d" block @click="download">下载APP</van-button>
+				</div>
+		</div>
+		<div class="copyright">深圳市盘古网络信息科技有限公司版权所有</div>
+			<van-overlay :show="show" @click="show = false">
+			  <div class="wrapper" @click.stop>
+			    <img src="sources/qq.png" width="100%" >
+			  </div>
+			</van-overlay>
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vant@2.10/lib/vant.min.js"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script src="sources/md5.js"></script>
+		<script>
+			var Vue = window.Vue
+			var vant = window.vant
+			
+			Vue.use(vant)
+			
+			Vue.prototype.$toast = vant.Toast;
+			
+			const phoneReg = /^[1](([3][0-9])|([4][5-9])|([5][0-3,5-9])|([6][5,6])|([7][0-8])|([8][0-9])|([9][1,8,9]))[0-9]{8}$/
+			const pwdReg = /^(?![\d]+$)(?![a-zA-Z]+$)(?![^\da-zA-Z]+$).{6,20}$/
+			
+			const authCaptcha = '/wx/auth/captcha'
+			
+			const authCreate = '/wx/auth/create'
+			
+			var app = new Vue({
+				el: '#app',
+				data: {
+					phone: '',
+					code: '',
+					pass: '',
+					conPass: '',
+					counting: false,
+					count: 0,
+					accountIcon: './sources/icon_account.png',
+					pwdIcon: './sources/icon_pwd.png',
+					codeIcon: './sources/icon_code.png',
+					pwdShowIcon: './sources/icon_pwd_show.png',
+					pwdHideIcon: './sources/icon_pwd_hide.png',
+					iconName: './sources/icon_pwd_hide.png',
+					typeName: 'password',
+					timer: null,
+					invitationCode: '',
+					baseUrl: 'https://app.pgwlxx.com',
+					// baseUrl: 'http://211.149.156.216:8088',
+					isLogining: false,
+					show: false
+				},
+				created() {
+					this.getInit()
+				},
+				methods:{
+					// 获取推荐码
+					getInit() {
+					  let URLINTHISPAGE = window.location.href;
+					  let url = new URL(URLINTHISPAGE);
+					  let c = url.searchParams.get("i");
+					  this.invitationCode = c
+					  console.log(this.invitationCode);
+					},
+					// 密码查看
+					statusClick() {
+						if (this.typeName === 'password') {
+							this.typeName = 'text'
+							this.iconName = this.pwdShowIcon
+						} else {
+							this.typeName = 'password'
+							this.iconName = this.pwdHideIcon
+						}
+					},
+					// 获取验证码
+					getCkCode() {
+						const that = this
+						if (phoneReg.test(that.phone)) {
+							axios.post(that.baseUrl + authCaptcha, { mobile: that.phone, type: 'register' }).then(res => {
+								if (res.data.errno === 0) {
+									that.$toast('验证码发送成功，请注意查收')
+									that.countdown()
+									return
+								}
+								that.$toast(res.data.errmsg)
+							})
+						} else {
+							this.$toast('您输入的手机号码有误!!!')
+						}
+					},
+					// 倒计时
+					countdown() {
+						this.count = 60
+						this.counting = true
+						this.timer = setInterval(() => {
+							if (this.count > 0 && this.count <= 60) {
+								this.count--;
+							} else {
+								this.counting = false
+								clearInterval(this.timer)
+								this.timer = null
+							}
+						}, 1000)
+					},
+					// 注册
+					confirmClick() {
+						this.isLogining = true
+						const registerData = this.validationData()
+						if (registerData) {
+							axios.post(this.baseUrl + authCreate, registerData).then(res => {
+								window.location.href = 'success.html'
+							}).catch(err => {
+								this.$toast(err)
+								this.isLogining = false
+							})
+						} else {
+							this.isLogining = false
+						}
+					},
+					validationData() {
+						if (!phoneReg.test(this.phone)) {
+							this.$toast('您输入的手机号码有误!!!')
+							return false
+						}
+						
+						if (this.code.length !== 6) {
+							this.$toast('您输入的验证码有误!!!')
+							return false
+						}
+						
+						if (this.pass !== this.conPass) {
+							this.$toast('您两次输入的密码不一致!!!')
+							return false
+						} else {
+							if (!pwdReg.test(this.pass)) {
+							    this.$toast('您输入的密码不能为纯数字或者字母')
+								return false
+							}
+						}
+						
+						const mobile = this.phone
+						const code = this.code
+						const password = md5(this.pass)
+						const invitationCode = this.invitationCode
+						const type = 'register'
+						
+						return {
+							mobile: mobile,
+							code: code,
+					        password: password,
+							invitationCode: invitationCode,
+							type: type
+						}
+						
+					},
+					// 下载
+					download() {
+						var ua = navigator.userAgent.toLowerCase();
+						var isWeixin = ua.indexOf('micromessenger') != -1;
+						if (isWeixin) {
+							this.show = true
+						}else{
+							window.open('https://share.pgwlxx.com/download/caisheng.apk')
+							// window.open('http://211.149.156.216:8090/download/caisheng.apk')
+						}
+					}
+				}
+			})
+		</script>
+	</body>
+</html>

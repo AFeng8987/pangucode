@@ -1,0 +1,20 @@
+server:
+  port: 8088
+
+logging:
+  level:
+    root:  ERROR
+    org.springframework:  ERROR
+    org.mybatis:  ERROR
+    org.linlinjava.litemall.admin:  INFO
+    org.linlinjava.litemall:  INFO
+    org.linlinjava.litemall.db.dao:  DEBUG
+  # 默认日志文件名
+  #window
+  #file: D:/mall_project/log-csmall/csmall-admin-log
+  #linux
+  file: /home/csmall_admin/csmall_admin_logs/csmall-admin.log
+
+
+swagger:
+  production: false

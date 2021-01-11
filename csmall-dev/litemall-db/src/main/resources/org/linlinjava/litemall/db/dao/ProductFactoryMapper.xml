@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.linlinjava.litemall.db.dao.ProductFactoryMapper">
+
+
+    <select id="queryBySpecsCodeId" parameterType="java.lang.Integer" resultType="java.util.Map">
+        SELECT pt.plant_name as plantName,p.id as id,p.goods_code_id as goodCodeId,
+            p.spec_code_id as specsCodeId,p.factory_id as factoryId,p.buy_price as buyPrice,
+          	p.cost_price as costPrice,p.goods_stock as goodsStock,p.warn_stock as warnStock
+        FROM litemall_product_factory p
+          	LEFT JOIN litemall_plant pt ON pt.id = p.factory_id
+        WHERE
+          	p.spec_code_id =#{specsCodeId,jdbcType=INTEGER}
+     </select>
+
+    <select id="reamStockList" resultMap="resultMap">
+        SELECT
+            gc.goods_code as goodsCode,
+            gc.code_name as codeName,
+            sp.spec_code as specsCode,
+            sp.url as  url,
+            sp.specs_desc as specsDesc,
+            p.plant_name as plantName,
+            DATE_FORMAT(pf.update_time,'%Y-%m-%d %H:%i:%s') as dateTime,
+            pf.goods_stock as goodsStock,
+            sp.total_stock as totalStock
+        FROM `litemall_product_factory` pf
+            left JOIN litemall_goods_code gc on pf.goods_code_id=gc.id
+            left join litemall_specode_product  sp on pf.spec_code_id=sp.id
+            left join litemall_plant  p on p.id=pf.factory_id
+        <trim prefix="WHERE" prefixOverrides="AND">
+            <if test="goodsCode != null and goodsCode != ''">
+                AND gc.goods_code = #{goodsCode,jdbcType=VARCHAR}
+            </if>
+            <if test="codeName != null and codeName != ''">
+                AND gc.code_name = #{codeName,jdbcType=VARCHAR}
+            </if>
+            <if test="specsCode != null and specsCode != ''">
+                AND sp.spec_code = #{specsCode,jdbcType=VARCHAR}
+            </if>
+            <if test="startDateTime != null">
+                AND pf.update_time &gt;= #{startDateTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endDateTime != null">
+                AND pf.update_time &lt;= #{endDateTime,jdbcType=TIMESTAMP}
+            </if>
+        </trim>
+        order by pf.update_time DESC
+    </select>
+
+    <select id="warnStockList" resultMap="resultMap">
+        SELECT
+        gc.goods_code as goodsCode,
+        gc.code_name as codeName,
+        sp.spec_code as specsCode,
+        sp.url as  url,
+        sp.specs_desc as specsDesc,
+        p.plant_name as plantName,
+        DATE_FORMAT(pf.update_time,'%Y-%m-%d %H:%i:%s') as dateTime,
+        pf.goods_stock as goodsStock,
+        pf.warn_stock as warnStock
+        FROM `litemall_product_factory` pf
+        left JOIN litemall_goods_code gc on pf.goods_code_id=gc.id
+        left join litemall_specode_product  sp on pf.spec_code_id=sp.id
+        left join litemall_plant  p on p.id=pf.factory_id
+        where pf.goods_stock &lt;= pf.warn_stock
+        <if test="goodsCode != null and goodsCode != ''">
+            AND gc.goods_code = #{goodsCode,jdbcType=VARCHAR}
+        </if>
+        <if test="codeName != null and codeName != ''">
+            AND gc.code_name = #{codeName,jdbcType=VARCHAR}
+        </if>
+        <if test="specsCode != null and specsCode != ''">
+            AND sp.spec_code = #{specsCode,jdbcType=VARCHAR}
+        </if>
+        <if test="startDateTime != null">
+            AND pf.update_time &gt;= #{startDateTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="endDateTime != null">
+            AND pf.update_time &lt;= #{endDateTime,jdbcType=TIMESTAMP}
+        </if>
+        order by pf.goods_stock asc
+    </select>
+
+    <resultMap id="resultMap" type="java.util.Map">
+        <result column="goodsCode" jdbcType="VARCHAR" property="goodsCode" />
+        <result column="codeName" jdbcType="VARCHAR" property="codeName" />
+        <result column="specsCode" jdbcType="VARCHAR" property="specsCode" />
+        <result column="url" jdbcType="VARCHAR" property="url" />
+        <result column="specsDesc" jdbcType="VARCHAR" property="specsDesc" typeHandler="org.linlinjava.litemall.db.mybatis.JsonStringArrayTypeHandler" />
+        <result column="plantName" jdbcType="DECIMAL" property="plantName" />
+        <result column="dateTime" jdbcType="TIMESTAMP" property="dateTime" />
+        <result column="goodsStock" jdbcType="INTEGER" property="goodsStock" />
+        <result column="warnStock" jdbcType="INTEGER" property="warnStock" />
+        <result column="totalStock" jdbcType="INTEGER" property="totalStock" />
+    </resultMap>
+
+
+
+</mapper>

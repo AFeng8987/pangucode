@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.linlinjava.litemall.db.dao.SpecodeProductMapper">
+
+    <resultMap id="Result" type="java.util.Map">
+        <id column="goodsCodeId" jdbcType="INTEGER" property="goodsCodeId" />
+        <result column="goodsCode" jdbcType="VARCHAR" property="goodsCode" />
+        <result column="codeName" jdbcType="VARCHAR" property="codeName" />
+        <result column="specsCodeId" jdbcType="INTEGER" property="specsCodeId" />
+        <result column="specsCode" jdbcType="VARCHAR" property="specsCode" />
+        <result column="specsDesc" jdbcType="VARCHAR" property="specsDesc" typeHandler="org.linlinjava.litemall.db.mybatis.JsonStringArrayTypeHandler" />
+        <result column="shopPrice" jdbcType="DECIMAL" property="shopPrice" />
+        <result column="url" jdbcType="VARCHAR" property="url" />
+    </resultMap>
+
+
+
+    <select id="queryByGCodeNameSpecsCode" resultMap="Result">
+     SELECT
+        gc.id as goodsCodeId,
+    	gc.goods_code  as goodsCode,
+    	gc.code_name as codeName,
+    	sp.id as specsCodeId,
+    	sp.spec_code as specsCode,
+        sp.specs_desc as specsDesc,
+    	sp.shop_price as shopPrice,
+    	sp.url as url
+     FROM
+    	`litemall_specode_product` sp
+    	LEFT JOIN litemall_goods_code gc ON gc.id = sp.goods_code_id
+      <trim prefix="WHERE" prefixOverrides="AND">
+          <if test="goodsCode != null and goodsCode != ''">
+              gc.goods_code=#{goodsCode,jdbcType=VARCHAR}
+          </if>
+          <if test="codeName != null and codeName != ''">
+              AND gc.code_name=#{codeName,jdbcType=VARCHAR}
+          </if>
+          <if test="specCode != null and specCode != ''">
+              AND sp.spec_code = #{specCode,jdbcType=VARCHAR}
+          </if>
+      </trim>
+  </select>
+
+
+    <update id="updateBatch" parameterType="java.util.List">
+        <foreach collection="list" item="item" index="index" open="" close="" separator=";">
+        update litemall_specode_product
+        <set >
+            <if test="item.specCode != null and item.specCode !='' "  >
+                spec_code = #{item.specCode,jdbcType=VARCHAR},
+            </if>
+            <if test="item.shopPrice != null and item.shopPrice !='' " >
+                shop_price = #{item.shopPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="item.url != null and item.url !=''" >
+                url = #{item.url,jdbcType=VARCHAR},
+            </if>
+        </set>
+        where id = #{item.id,jdbcType=INTEGER}
+        </foreach>
+    </update>
+</mapper>

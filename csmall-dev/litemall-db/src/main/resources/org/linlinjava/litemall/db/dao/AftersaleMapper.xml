@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.linlinjava.litemall.db.dao.AftersaleMapper">
+
+  <resultMap id="afterSaleMap" type="java.util.Map">
+      <id column="id" jdbcType="INTEGER" property="id" />
+      <result column="userName" jdbcType="VARCHAR" property="userName" />
+      <result column="afterSaleSn" jdbcType="VARCHAR" property="afterSaleSn" />
+      <result column="orderSn" jdbcType="VARCHAR" property="orderSn" />
+      <result column="payId" jdbcType="VARCHAR" property="payId" />
+      <result column="payType" jdbcType="VARCHAR" property="payType" />
+      <result column="service_type" jdbcType="INTEGER" property="serviceType" />
+      <result column="orderStatus" jdbcType="SMALLINT" property="orderStatus" />
+      <result column="goodsName" jdbcType="VARCHAR" property="goodsName" />
+      <result column="amount" jdbcType="DECIMAL" property="amount" />
+      <result column="pictures" jdbcType="VARCHAR" property="pictures" typeHandler="org.linlinjava.litemall.db.mybatis.JsonStringArrayTypeHandler" />
+      <result column="comment" jdbcType="VARCHAR" property="comment" />
+      <result column="courier_number" jdbcType="VARCHAR" property="courierNumber" />
+      <result column="courier_company" jdbcType="VARCHAR" property="courierCompany" />
+      <result column="status" jdbcType="INTEGER" property="status" />
+      <result column="reject_reason" jdbcType="VARCHAR" property="rejectReason" />
+      <result column="handle_time" jdbcType="TIMESTAMP" property="handleTime" />
+      <result column="add_time" jdbcType="TIMESTAMP" property="addTime" />
+      <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+      <result column="deleted" jdbcType="BIT" property="deleted" />
+  </resultMap>
+
+    <select id="queryAfterSaleList" resultType="java.util.Map">
+     SELECT
+       a.id as id,
+       u.username as userName,
+       a.aftersale_sn as afterSaleSn,
+       o.order_sn as orderSn,
+       o.pay_order_sn as payOrderSn,
+       o.pay_id AS payId,
+       o.pay_type as payType,
+       o.order_status as orderStatus,
+      (CASE o.order_status WHEN  201 THEN '待发货' WHEN 301 THEN '待收货'WHEN 501 THEN '已关闭' ELSE '已收货' END) as orderStatusName,
+       og.goods_name as goodsName,
+       a.amount as amount,
+       a.service_type as serviceType,
+      (CASE a.service_type WHEN 1 THEN '仅退款' ELSE '退货退款' END) as serviceTypeName,
+       a.reject_reason as rejectReason,
+       DATE_FORMAT(a.add_time,'%Y-%m-%d %H:%i:%s') as addTime,
+       a.`status`,
+       a.`confirm_return` as confirmReturn,
+       p.plant_name as plantName
+      FROM
+       litemall_aftersale a
+     INNER JOIN litemall_plant p ON p.id = a.plant_id
+     INNER JOIN litemall_order_goods og ON og.id = a.order_goods_id
+     INNER JOIN litemall_order o ON o.id = a.order_id
+     INNER JOIN litemall_user u ON u.id = a.user_id
+      <where>
+          <if test="serviceType != null">
+              a.service_type = #{serviceType,jdbcType=INTEGER}
+          </if>
+          <if test="ids != null and ids.size() > 0">
+              and a.id in
+              <foreach item="item" collection="ids" separator="," open="(" close=")" index="index">
+                  #{item}
+              </foreach>
+          </if>
+          <if test="afterSaleSn != null and afterSaleSn != '' ">
+              and a.aftersale_sn = #{afterSaleSn,jdbcType=VARCHAR}
+          </if>
+          <choose>
+              <when test="refundStatus == 0">
+                  and a.status in (11,12)
+              </when>
+              <when test="refundStatus == 1">
+                  and a.status = 1
+              </when>
+              <when test="refundStatus == 2 ">
+                  and a.status in (2,4)
+              </when>
+              <when test="refundStatus == 3 ">
+                  and a.status = 3
+              </when>
+              <when test="refundStatus == 4 ">
+                  and a.status = 5
+              </when>
+              <when test="refundStatus == 5 ">
+                  and a.status = 6
+              </when>
+          </choose>
+          <if test="orderSn != null and orderSn != '' ">
+              AND o.order_sn = #{orderSn,jdbcType=VARCHAR}
+          </if>
+          <if test="payOrderSn != null  and payOrderSn != ''">
+              and o.pay_order_sn = #{payOrderSn,jdbcType=VARCHAR}
+          </if>
+          <if test="payId != null and payId != '' ">
+              AND o.pay_id = #{payId,jdbcType=VARCHAR}
+          </if>
+          <if test="startTime != null">
+              AND a.add_time &gt;= #{startTime,jdbcType=TIMESTAMP}
+          </if>
+          <if test="endTime != null">
+              AND a.add_time &lt;= #{endTime,jdbcType=TIMESTAMP}
+          </if>
+      </where>
+      ORDER BY a.add_time DESC
+  </select>
+
+
+    <select id="queryCountByStatus" resultType="java.util.Map">
+        select
+        COUNT(if(a.`status` in (11,12),a.id,null)) as applyTotal,
+        count(if(a.`status` =1,a.id,null)) as allowReturnTotal,
+		count(if(a.`status` =3,a.id,null)) as exportTotal
+        FROM
+        litemall_aftersale a
+        INNER JOIN litemall_order o ON o.id = a.order_id
+        <where>
+            <if test="serviceType != null">
+                a.service_type = #{serviceType,jdbcType=INTEGER}
+            </if>
+            <if test="afterSaleSn != null and afterSaleSn != '' ">
+                and a.aftersale_sn = #{afterSaleSn,jdbcType=VARCHAR}
+            </if>
+            <if test="orderSn != null and orderSn != '' ">
+                AND o.order_sn = #{orderSn,jdbcType=VARCHAR}
+            </if>
+            <if test="payOrderSn != null  and payOrderSn != ''">
+                and o.pay_order_sn = #{payOrderSn,jdbcType=VARCHAR}
+            </if>
+            <if test="payId != null and payId != '' ">
+                AND o.pay_id = #{payId,jdbcType=VARCHAR}
+            </if>
+            <if test="startTime != null">
+                AND a.add_time &gt;= #{startTime,jdbcType=TIMESTAMP}
+            </if>
+            <if test="endTime != null">
+                AND a.add_time &lt;= #{endTime,jdbcType=TIMESTAMP}
+            </if>
+        </where>
+
+    </select>
+
+    <update id="updateData"  parameterType="org.linlinjava.litemall.db.domain.LitemallAftersale">
+        update litemall_aftersale
+        <set>
+            <if test="returnPayId != null and returnPayId != ''">
+                return_pay_id = #{returnPayId,jdbcType=VARCHAR},
+            </if>
+            <if test="status != null">
+                `status` = #{status,jdbcType=INTEGER},
+            </if>
+            <if test="lastOperator != null">
+                last_operator = #{lastOperator,jdbcType=INTEGER},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime,jdbcType=TIMESTAMP},
+            </if>
+        </set>
+        where aftersale_sn = #{aftersaleSn,jdbcType=VARCHAR}
+    </update>
+
+
+</mapper>

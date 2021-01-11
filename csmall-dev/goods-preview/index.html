@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<title>商品详情</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.10/lib/index.css" />
+		<link rel="icon" href="./sources/favicon.ico" type="image/x-icon" />
+		<link href="./sources/index.css" rel="stylesheet" />
+	</head>
+	<body>
+		<div id="app" style="background: #f7f8fa;">
+			<van-sticky><van-nav-bar title="商品详情"></van-nav-bar></van-sticky>
+			<van-swipe :autoplay="3000" :lazy-render="true" indicator-color="#FF4600">
+			  <van-swipe-item v-for="(image, index) in goodsInfo.gallery" :key="index">
+			    <div class="goods_swipe_img">
+			    	<img :src="image" width="100%" />
+			    </div>
+			  </van-swipe-item>
+			</van-swipe>
+			
+			<van-cell-group class="goods_cell_group">
+				<van-cell>
+			        <div>
+			          <span class="goods_price"> ¥{{ getPrice(goodsInfo.retailPrice) }}</span>
+			          <span class="goods_market_price"> ¥{{ getPrice(goodsInfo.counterPrice) }}</span>
+			        </div>
+			        <div class="goods_title">{{ goodsInfo.name }}</div>
+			        <div class="goods_intro">{{ goodsInfo.brief }}</div>
+			    </van-cell>
+			</van-cell-group>
+			
+			<van-cell-group class="goods_cell_group">
+				<van-cell title="选择" is-link value="请选择：例颜色 尺码"></van-cell>
+				<van-cell title="属性" value="件数 背面材质" is-link></van-cell>
+				<van-cell title="运费" value="全场包邮" is-link></van-cell>
+			</van-cell-group>
+			
+			<div class="goods_desc">
+			    <div class="goods_desc_title">商品详情</div>
+			    <div v-if="goodsInfo.detail" class="item_desc_wrap" v-html="goodsInfo.detail"/>
+			    <div v-else class="item_desc_wrap" style="text-align: center;">
+					<p>无详情</p>
+			    </div>
+			</div>
+			
+			<van-goods-action>
+				<van-goods-action-button type="warning" text="加入乾坤袋" @click="onClickButton"></van-goods-action-button>
+				<van-goods-action-button type="danger" text="立即购买" @click="onClickButton"></van-goods-action-button>
+			</van-goods-action>
+			
+		</div>
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vant@2.10/lib/vant.min.js"></script>
+		<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+		<script>
+			var Vue = window.Vue
+			var vant = window.vant
+			
+			Vue.use(vant)
+			
+			Vue.prototype.$toast = vant.Toast;
+			
+			const authCreate = '/wx/goods/detail'
+			const baseUrl = 'https://app.pgwlxx.com'
+			// const baseUrl = 'http://211.149.156.216:8088'
+			
+			var app = new Vue({
+				el: '#app',
+				data: {
+					goodsSN: '',
+					goodsInfo: {
+						retailPrice: 0,
+						counterPrice: 0
+					}
+				},
+				created() {
+					this.getInit()
+				},
+				methods: {
+					// 获取商品SN
+					getInit() {
+					  let URLINTHISPAGE = window.location.href;
+					  let url = new URL(URLINTHISPAGE);
+					  let d = url.searchParams.get("d");
+					  this.goodsSN = d
+					  this.getGoodsData()
+					},
+					getGoodsData() {
+						axios.get(baseUrl + authCreate, { params:{ id: this.goodsSN }}).then(res => {
+							console.log(res)
+							res.data.data.info.gallery = JSON.parse(res.data.data.info.gallery)
+							this.goodsInfo = res.data.data.info
+						})
+					},
+					onClickButton() {},
+					// 转换为金额
+					getPrice(x) {
+						var f = parseFloat(x);
+						if (isNaN(f)) {
+							return false;
+						}
+						var f = Math.round(x * 100) / 100;
+						var s = f.toString();
+						var rs = s.indexOf('.');
+						if (rs < 0) {
+							rs = s.length;
+							s += '.';
+						}
+						while (s.length <= rs + 2) {
+							s += '0';
+						}
+						return s;
+					}
+				}
+			})
+		</script>
+	</body>
+</html>

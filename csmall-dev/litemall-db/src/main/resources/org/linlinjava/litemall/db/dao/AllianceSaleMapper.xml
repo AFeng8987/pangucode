@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.linlinjava.litemall.db.dao.AllianceSaleMapper">
+
+
+    <select id="queryByAllianceUserId" resultType="java.util.Map">
+      SELECT
+	     c.`name` AS `categoryName`,
+	     a.goods_number AS goodsNumber,
+	     a.goods_price AS goodsPrice,
+	     a.plant_cost_price AS plantCostPrice,
+	     a.total_profit AS totalOProfit,
+	     a.order_goods_id AS orderGoodsId
+	  FROM
+	    litemall_alliance_sale a
+	  LEFT JOIN litemall_category c ON c.id=a.category_id
+	  WHERE a.alliance_userid=#{allianceUserId} AND a.order_close_time &gt;=  #{startTime}
+	  order by  a.order_close_time desc
+    </select>
+
+	<select id="totalAllianceData" resultType="java.util.Map">
+	  SELECT
+        SUM(a.goods_number*a.goods_price) AS totalSales,
+        SUM(a.total_profit) AS totalProfit
+	  FROM
+	    litemall_alliance_sale a
+	  LEFT JOIN litemall_category c ON c.id=a.category_id
+	  WHERE a.alliance_userid=#{allianceUserId} AND a.order_close_time &gt;= #{startTime}
+	</select>
+
+    <select id="exportList" resultType="java.util.Map">
+		SELECT
+		a.id AS id,
+		a.order_sn AS orderSn,
+		o.pay_order_sn as payOrderSn,
+		c.`name` AS `categoryName`,
+		a.goods_number AS goodsNumber,
+		a.goods_price AS goodsPrice,
+		a.plant_cost_price AS plantCostPrice,
+		a.coupon_price AS couponPrice,
+		a.total_profit AS totalProfit,
+		if(a.alliance_userid ='-1','平台所属',a.alliance_name) as allianceName,
+		if(a.alliance_userid ='-1','平台所属',u.username) as userName,
+		p.plant_name as plantName,
+		DATE_FORMAT(a.order_add_time,'%Y-%m-%d %H:%i:%s') as orderAddTime,
+		DATE_FORMAT(a.order_close_time,'%Y-%m-%d %H:%i:%s') as orderCloseTime
+		FROM
+		litemall_alliance_sale a
+		LEFT JOIN litemall_order o ON o.order_sn = a.order_sn
+		LEFT JOIN litemall_category c ON c.id = a.category_id
+		LEFT JOIN litemall_user u ON u.id = a.alliance_userid
+		LEFT JOIN litemall_plant p ON p.id = a.plant_id
+		<where>
+			<if test="ids != null and ids.size() > 0">
+				and a.id in
+				<foreach item="item" collection="ids" separator="," open="(" close=")" index="index">
+					#{item}
+				</foreach>
+			</if>
+			<choose>
+				<when test="allianceName!=null  and allianceName =='平台所属'">
+					and a.alliance_userid=-1
+				</when>
+				<when test="allianceName!=null  and allianceName !='平台所属'">
+					and a.alliance_name=#{allianceName}
+				</when>
+				<otherwise>
+				</otherwise>
+			</choose>
+			<choose>
+				<when test="userName!=null  and userName =='平台'">
+					and a.alliance_userid=-1
+				</when>
+				<when test="userName!=null  and userName !='平台'">
+					and u.username=#{userName}
+				</when>
+				<otherwise>
+				</otherwise>
+			</choose>
+			<if test="orderSn!=null and orderSn!='' ">
+				and a.order_sn=#{orderSn}
+			</if>
+			<if test="payOrderSn!=null and payOrderSn!='' ">
+				and o.pay_order_sn=#{payOrderSn}
+			</if>
+			<if test="orderAddStartTime!=null">
+				and a.order_add_time <![CDATA[>= ]]> #{orderAddStartTime}
+			</if>
+			<if test="orderAddEndTime!=null">
+				and a.order_add_time <![CDATA[<= ]]> #{orderAddEndTime}
+			</if>
+			<if test="orderCloseStartTime!=null">
+				and a.order_close_time <![CDATA[>= ]]> #{orderCloseStartTime}
+			</if>
+			<if test="orderCloseEndTime!=null">
+				and a.order_close_time <![CDATA[<= ]]> #{orderCloseEndTime}
+			</if>
+		</where>
+	     ORDER BY  a.order_close_time DESC
+
+	</select>
+
+
+</mapper>

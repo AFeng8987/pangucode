@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+		<title>注册成功</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/vant@2.10/lib/index.css" />
+		<link rel="icon" href="./sources/favicon.ico" type="image/x-icon" />
+		<link rel="stylesheet" href="./sources/index.css" />
+	</head>
+	<body>
+		<div id="app">
+			<van-nav-bar title="注册成功"></van-nav-bar>
+			<div class="success_box">
+				<img src="sources/register_success.png" >
+				<div class="success_font">恭喜您已经注册成功</div>
+				
+				<van-button class="success_button" type="primary" color="#FEBF00" block @click='download'>下载</van-button>
+			</div>
+			
+			<van-overlay :show="show" @click="show = false">
+			  <div class="wrapper" @click.stop>
+			    <img src="sources/qq.png" width="100%" >
+			  </div>
+			</van-overlay>
+		</div>
+		
+		<script src="https://cdn.jsdelivr.net/npm/vue@2.6/dist/vue.min.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vant@2.10/lib/vant.min.js"></script>
+		
+		<script>
+			var Vue = window.Vue
+			var vant = window.vant
+			
+			Vue.use(vant)
+			
+			var app = new Vue({
+				el:'#app',
+				data: {
+					show: false
+				},
+				methods: {
+					// 下载
+					download() {
+						var ua = navigator.userAgent.toLowerCase();
+						var isWeixin = ua.indexOf('micromessenger') != -1;
+						if (isWeixin) {
+							this.show = true
+						}else{
+							window.open('https://share.pgwlxx.com/download/caisheng.apk')
+							// window.open('http://211.149.156.216:8090/download/caisheng.apk')
+						}
+					}
+				}
+			})
+		</script>
+	</body>
+</html>

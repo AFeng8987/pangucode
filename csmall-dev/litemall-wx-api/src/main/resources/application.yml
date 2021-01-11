@@ -1,0 +1,22 @@
+spring:
+  profiles:
+    active: db-dev, core-dev, wx
+  messages:
+    encoding: UTF-8
+
+server:
+  port: 8089
+
+logging:
+  level:
+    root:  ERROR
+    org.springframework:  ERROR
+    org.mybatis:  ERROR
+    org.linlinjava.litemall.wx:  DEBUG
+    org.linlinjava.litemall:  INFO
+    org.linlinjava.litemall.db.dao:  DEBUG
+  #linux
+  file: /home/csmall_app/csmall_app_logs/csmall-app.log
+
+swagger:
+  production: false

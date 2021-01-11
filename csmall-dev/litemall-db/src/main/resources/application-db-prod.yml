@@ -1,0 +1,46 @@
+pagehelper:
+  helperDialect:  mysql
+  reasonable: false
+  supportMethodsArguments:  true
+  params: count=countSql
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    #正式线
+    url:  jdbc:mysql://139.9.221.80:3306/csmall?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true&verifyServerCertificate=false&useSSL=false
+    username:  root
+    password:  t4WbTcXthK3u3FGhnC+RcBecIId+VYWxm3QwufQVgYSZFCBQ/vG+u57tXY0cCRSotrobeX9fLiT12GrPUi5kZA==
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      # 初始化连接大小
+      initial-size: 10
+      # 最小空闲连接数
+      min-idle: 50
+      #最大连接数
+      max-active: 500
+      #查询超时时间
+      query-timeout: 200000
+      #事务查询超时时间
+      transaction-query-timeout: 200000
+      #关闭空闲连接超时时间
+      remove-abandoned-timeout: 1800
+      # 配置获取连接等待超时的时间
+      max-wait: 300000
+      ##配置间隔多久才进行一次检测，检测需要关闭的空闲连接，单位是毫秒
+      time-between-eviction-runs-millis: 300000
+      ##配置一个连接在池中最小生存的时间，单位是毫秒
+      min-victable-idle-time-millis: 300000
+      validation-query: select 1
+      test-while-idle: true
+      test-on-borrow: true
+      test-on-return: true
+      pool-prepared-statements: true
+      max-open-prepared-statements: 300
+      verify-server-certificate: false
+      # 配置监控统计拦截的filters，去掉后监控界面sql无法统计，'wall'用于防火墙
+      filters: stat,config
+      # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
+      connection-properties: druid.stat.mergeSql=true;druid.stat.slowSqlMillis=5000;config.decrypt=true;config.decrypt.key=MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMzVfoKejceUg+j42G5Icdw2MSJjRsVr2V/P7lDz2kBnlOsMZ/CNQVyNCqC69JiGK3fAXOTZThCBQRgzsSTUrjsCAwEAAQ==
+      # 合并多个DruidDataSource的监控数据
+      use-global-dataSource-stat: true

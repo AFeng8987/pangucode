@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.pangu.caisheng" version="1.0.4" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0" xmlns:android="http://schemas.android.com/apk/res/android">
+    <name>财神商城</name>
+    <description>
+        更多好物，请关注和使用财神商城APP
+    </description>
+    <author email="dev@cordova.apache.org" href="http://cordova.io">
+        Team: 深圳市盘古网络信息科技有限公司
+    </author>
+    <content src="index.html" />
+    <access origin="*" />
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+    <allow-intent href="tel:*" />
+    <allow-intent href="sms:*" />
+    <allow-intent href="mailto:*" />
+    <allow-intent href="geo:*" />
+    <allow-navigation href="*" /> 
+    <platform name="android">
+        <allow-intent href="market:*" />
+        <icon src="res/android/logo.png" />
+        <edit-config file="AndroidManifest.xml" mode="merge" target="/manifest/application">
+            <activity android:usesCleartextTraffic="true" />
+            <activity android:requestLegacyExternalStorage="true" />
+            <!-- <activity android:name=".wxapi.WXEntryActivity" android:label="WXEntryActivity" android:exported="true" /> -->
+        </edit-config>
+        <config-file parent="/*" target="AndroidManifest.xml" >
+	    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+	    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+	    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+	</config-file>
+        <preference name="orientation" value="portrait" />
+    </platform>
+    <platform name="ios">
+        <allow-intent href="itms:*" />
+        <allow-intent href="itms-apps:*" />
+        <icon height="40" src="res/ios/ios-20@2.png" width="40" />
+        <icon height="60" src="res/ios/ios-20@3.png" width="60" />
+        <icon height="29" src="res/ios/ios-29.png" width="29" />
+        <icon height="58" src="res/ios/ios-29@2.png" width="58" />
+        <icon height="87" src="res/ios/ios-29@3.png" width="87" />
+        <icon height="80" src="res/ios/ios-40@2.png" width="80" />
+        <icon height="57" src="res/ios/ios-57.png" width="57" />
+        <icon height="114" src="res/ios/ios-57@2.png" width="114" />
+        <icon height="120" src="res/ios/ios-60@2.png" width="120" />
+        <icon height="180" src="res/ios/ios-60@3.png" width="180" />
+        <icon height="1024" src="res/ios/ios-1024.png" width="1024" />
+        <edit-config file="*-Info.plist" mode="merge" target="NSPhotoLibraryAddUsageDescription">
+            <string>APP保存图片到相册,是否允许</string>
+        </edit-config>
+        <edit-config target="NSPhotoLibraryUsageDescription" file="*-Info.plist" mode="merge">
+            <string>APP需要获取进入相册的权限，是否允许</string>
+        </edit-config>
+        <preference name="AllowInlineMediaPlayback" value="true" />
+    </platform>
+</widget>

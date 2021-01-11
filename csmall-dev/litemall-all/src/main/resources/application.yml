@@ -1,0 +1,23 @@
+spring:
+  profiles:
+    active: db-dev, core-dev, admin, wx
+  messages:
+    encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+server:
+  port: 8088
+
+  compression:
+    enabled: true
+    min-response-size: 2048
+    mime-types: application/javascript,text/css,application/json,application/xml,text/html,text/xml,text/plain
+
+logging:
+  config: classpath:logback-spring.xml
+
+swagger:
+  production: false

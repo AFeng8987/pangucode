@@ -1,0 +1,257 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.linlinjava.litemall.db.dao.OrderMapper">
+    <insert id="batchInsert" keyColumn="id" keyProperty="id" parameterType="map" useGeneratedKeys="true">
+        insert into litemall_order
+        (user_id, order_sn, pay_order_sn,
+        order_status, consignee, mobile,
+        address, goods_price, freight_price,
+        coupon_price, order_price, actual_price,
+        plant_id, alliance_userid, message )
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId,jdbcType=INTEGER}, #{item.orderSn,jdbcType=VARCHAR}, #{item.payOrderSn,jdbcType=VARCHAR},
+            #{item.orderStatus,jdbcType=SMALLINT}, #{item.consignee,jdbcType=VARCHAR}, #{item.mobile,jdbcType=VARCHAR},
+            #{item.address,jdbcType=VARCHAR}, #{item.goodsPrice,jdbcType=DECIMAL}, #{item.freightPrice,jdbcType=DECIMAL},
+            #{item.couponPrice,jdbcType=DECIMAL}, #{item.orderPrice,jdbcType=DECIMAL}, #{item.actualPrice,jdbcType=DECIMAL},
+            #{item.plantId,jdbcType=INTEGER}, #{item.allianceUserid,jdbcType=INTEGER}, #{item.message,jdbcType=VARCHAR}
+            )
+        </foreach>
+    </insert>
+    <update id="updateWithOptimisticLocker" parameterType="map">
+        update litemall_order
+        <set>
+            <if test="order.id != null">
+                id = #{order.id,jdbcType=INTEGER},
+            </if>
+            <if test="order.userId != null">
+                user_id = #{order.userId,jdbcType=INTEGER},
+            </if>
+            <if test="order.orderSn != null">
+                order_sn = #{order.orderSn,jdbcType=VARCHAR},
+            </if>
+            <if test="order.orderStatus != null">
+                order_status = #{order.orderStatus,jdbcType=SMALLINT},
+            </if>
+            <if test="order.consignee != null">
+                consignee = #{order.consignee,jdbcType=VARCHAR},
+            </if>
+            <if test="order.mobile != null">
+                mobile = #{order.mobile,jdbcType=VARCHAR},
+            </if>
+            <if test="order.address != null">
+                address = #{order.address,jdbcType=VARCHAR},
+            </if>
+            <if test="order.message != null">
+                message = #{order.message,jdbcType=VARCHAR},
+            </if>
+            <if test="order.goodsPrice != null">
+                goods_price = #{order.goodsPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="order.orderPrice != null">
+                order_price = #{order.orderPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="order.actualPrice != null">
+                actual_price = #{order.actualPrice,jdbcType=DECIMAL},
+            </if>
+            <if test="order.payId != null">
+                pay_id = #{order.payId,jdbcType=VARCHAR},
+            </if>
+            <if test="order.payTime != null">
+                pay_time = #{order.payTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="order.endTime != null">
+                end_time = #{order.endTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="order.addTime != null">
+                add_time = #{order.addTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="order.updateTime != null">
+                update_time = #{order.updateTime,jdbcType=TIMESTAMP},
+            </if>
+            <if test="order.deleted != null">
+                deleted = #{order.deleted,jdbcType=BIT},
+            </if>
+        </set>
+        where id = #{order.id,jdbcType=INTEGER} and update_time = #{lastUpdateTime,jdbcType=INTEGER}
+    </update>
+
+    <select id="queryOrder" resultType="java.util.Map">
+       SELECT
+      	o.id as id ,
+      	o.order_sn as orderSn,
+        o.pay_order_sn as payOrderSn,
+      	o.order_status as orderStatus,
+        u.username as userName,
+      	o.consignee as consignee,
+      	o.address as address,
+      	o.message as message,
+      	o.goods_price as goodsPrice,
+      	o.coupon_price as couponPrice,
+        o.order_price as orderPrice,
+      	o.actual_price as actualPrice,
+      	o.pay_id as payId,
+      	o.pay_type as payType,
+      	DATE_FORMAT(o.pay_time,'%Y-%m-%d %H:%i:%s') as payTime,
+        DATE_FORMAT(o.add_time,'%Y-%m-%d %H:%i:%s') as addTime,
+        if(o.alliance_userid ='-1','平台所属',a.alliance_name) as allianceName
+      FROM
+      	litemall_order  o
+      	Left join litemall_alliance a on a.user_id=o.alliance_userid
+      	Left join litemall_user u on u.id=o.user_id
+      WHERE
+        o.deleted = FALSE
+        <if test="consignee != null  and consignee != ''">
+            and o.consignee = #{consignee,jdbcType=VARCHAR}
+        </if>
+        <if test="orderSn != null  and orderSn != ''">
+            and o.order_sn = #{orderSn,jdbcType=VARCHAR}
+        </if>
+        <if test="payOrderSn != null  and payOrderSn != ''">
+            and o.pay_order_sn = #{payOrderSn,jdbcType=VARCHAR}
+        </if>
+        <if test="userName != null  and userName != ''">
+            and u.username = #{userName,jdbcType=VARCHAR}
+        </if>
+        <if test="orderStatusArray != null  and orderStatusArray.size() != 0">
+            and o.order_status IN
+            <foreach collection="orderStatusArray" index="index" item="item"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="startTime != null">
+            AND o.add_time &gt;= #{startTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="endTime != null">
+            AND o.add_time &lt;= #{endTime,jdbcType=TIMESTAMP}
+        </if>
+      ORDER BY
+        o.add_time DESC
+    </select>
+    <select id="queryDetailById" parameterType="java.lang.Integer" resultType="java.util.Map">
+      SELECT
+      	o.id as id ,
+      	o.user_id as userId,
+      	o.order_sn as orderSn,
+      	o.order_status as orderStatus,
+      	o.consignee as consignee,
+      	o.mobile as mobile,
+      	o.address as address,
+      	o.message as message,
+      	o.goods_price as goodsPrice,
+      	o.order_price as orderPrice,
+      	o.actual_price as actualPrice,
+      	o.delivery_status as deliveryStatus,
+      	o.reminder_shipment as reminderShipment,
+        DATE_FORMAT(o.ship_time,'%Y-%m-%d %H:%i:%s')  as shipTime,
+      	o.reminder_shipment as reminderShipment,
+      	o.pay_id as payId,
+      	o.pay_type as payType,
+      	DATE_FORMAT(o.pay_time,'%Y-%m-%d %H:%i:%s')  as payTime,
+        DATE_FORMAT(o.end_time,'%Y-%m-%d %H:%i:%s')  as endTime,
+        DATE_FORMAT(o.add_time,'%Y-%m-%d %H:%i:%s')  as addTime,
+        DATE_FORMAT(o.update_time,'%Y-%m-%d %H:%i:%s')  as updateTime,
+      	if(a.group_id ='0','平台所属',ag.group_name) as groupName
+      FROM
+      	litemall_order  o
+      	Left join litemall_alliance_group ag on ag.id=o.group_id
+      WHERE
+        o.deleted = FALSE and o.id= #{orderId,jdbcType=INTEGER}
+    </select>
+    <select id="queryOrderDelivery" resultType="java.util.Map">
+        SELECT
+            o.id AS orderId,
+        	o.order_sn AS orderSn,
+            o.pay_order_sn as payOrderSn,
+        	o.consignee AS consignee,
+        	o.address AS address,
+        	o.message AS message,
+        	o.reminder_shipment AS reminderShipment,
+        	o.ship_sn AS shipSn,
+            DATE_FORMAT(o.ship_time,'%Y-%m-%d %H:%i:%s')  AS shipTime,
+            o.order_status as orderStatus,
+        	o.delivery_status as deliveryStatus,
+            p.plant_name AS plantName,
+            DATE_FORMAT(o.add_time,'%Y-%m-%d %H:%i:%s')  AS addTime
+        FROM
+           (select * FROM litemall_order WHERE (order_status !=501 and delivery_status=0) or (delivery_status=1))  o
+        	left JOIN  litemall_plant p ON o.plant_id = p.id
+        WHERE
+        	o.deleted = FALSE and o.order_status &gt;= 201
+        <if test="plantId != null ">
+            and o.plant_id = #{plantId,jdbcType=INTEGER}
+        </if>
+        <if test="deliveryStatus != null ">
+            and o.delivery_status = #{deliveryStatus,jdbcType=BIT}
+        </if>
+        <if test="consignee != null  and consignee != ''">
+            and o.consignee = #{consignee,jdbcType=VARCHAR}
+        </if>
+        <if test="orderSn != null  and orderSn != ''">
+            and o.order_sn = #{orderSn,jdbcType=VARCHAR}
+        </if>
+        <if test="payOrderSn != null  and payOrderSn != ''">
+            and o.pay_order_sn = #{payOrderSn,jdbcType=VARCHAR}
+        </if>
+        <if test="startTime != null">
+            AND o.add_time &gt;= #{startTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="endTime != null">
+            AND o.add_time &lt;= #{endTime,jdbcType=TIMESTAMP}
+        </if>
+        ORDER BY o.reminder_shipment DESC,o.delivery_status asc, o.add_time DESC
+    </select>
+    <select id="queryAppList" resultType="java.lang.String">
+        SELECT
+        o.payOrderSn AS payOrderSn
+        FROM
+        (<include refid="groupByPayOrderSN" />) o
+        ORDER BY
+        o.addTime DESC
+    </select>
+    <select id="countOrderDelivery" resultType="java.util.Map">
+        SELECT count(o.id) as countDelivery
+        FROM
+        litemall_order o
+        left JOIN  litemall_plant p ON o.plant_id = p.id
+        WHERE
+        o.deleted = FALSE and o.order_status = 201 and o.delivery_status =false
+        <if test="plantId != null ">
+            and o.plant_id = #{plantId,jdbcType=INTEGER}
+        </if>
+        <if test="consignee != null  and consignee != ''">
+            and o.consignee = #{consignee,jdbcType=VARCHAR}
+        </if>
+        <if test="orderSn != null  and orderSn != ''">
+            and o.order_sn = #{orderSn,jdbcType=VARCHAR}
+        </if>
+        <if test="payOrderSn != null  and payOrderSn != ''">
+            and o.pay_order_sn = #{payOrderSn,jdbcType=VARCHAR}
+        </if>
+        <if test="startTime != null">
+            AND o.add_time &gt;= #{startTime,jdbcType=TIMESTAMP}
+        </if>
+        <if test="endTime != null">
+            AND o.add_time &lt;= #{endTime,jdbcType=TIMESTAMP}
+        </if>
+    </select>
+    <sql id="groupByPayOrderSN">
+        SELECT
+          pay_order_sn AS payOrderSn,
+          MAX( add_time ) AS addTime
+        FROM litemall_order
+         WHERE deleted = FALSE
+           AND user_id =#{userId}
+           <if test="orderStatusArray != null  and orderStatusArray.size() != 0">
+              and order_status IN
+            <foreach collection="orderStatusArray" index="index" item="item"
+                     open="(" separator="," close=")">
+                #{item}
+            </foreach>
+           </if>
+        GROUP BY pay_order_sn
+    </sql>
+
+
+</mapper>

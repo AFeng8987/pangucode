@@ -1,0 +1,5 @@
+spring:
+  profiles:
+    active: db-dev, core-dev, admin, wx
+  messages:
+    encoding: UTF-8
